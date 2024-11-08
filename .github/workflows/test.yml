@@ -1,0 +1,61 @@
+# .github/workflows/test.yml
+name: Test Services
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [auth, todos, users]  # Service names for Auth API, TODOs API, and Users API
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # For Auth API (Go)
+      - name: Set up Go
+        if: matrix.service == 'auth'
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.15'  # Specify Go version as required
+
+      - name: Run Tests for Auth API
+        if: matrix.service == 'auth'
+        run: |
+          cd auth
+          go test ./...
+
+      # For TODOs API (Node.js)
+      - name: Set up Node.js
+        if: matrix.service == 'todos'
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install Dependencies and Run Tests for TODOs API
+        if: matrix.service == 'todos'
+        run: |
+          cd todos
+          npm install
+          npm test
+
+      # For Users API (Java Spring Boot)
+      - name: Set up Java
+        if: matrix.service == 'users'
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+
+      - name: Run Tests for Users API
+        if: matrix.service == 'users'
+        run: |
+          cd users
+          ./gradlew test
